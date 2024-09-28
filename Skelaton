@@ -10,9 +10,9 @@ local function DrawLine()
     l.Visible = false
     l.From = Vector2.new(0, 0)
     l.To = Vector2.new(1, 1)
-    l.Color = Color3.fromRGB(0, 255, 0)
-    l.Thickness = 2
-    l.Transparency = 0.5
+    l.Color = Color3.fromRGB(255, 255, 255) -- White color
+    l.Thickness = 1 -- Skinnier line
+    l.Transparency = 0 -- Full visibility
     return l
 end
 
@@ -26,8 +26,8 @@ end
 local function DrawESP(plr)
     repeat wait() until plr.Character ~= nil and plr.Character:FindFirstChild("Humanoid") ~= nil
     local limbs = {}
-    local R15 = (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R15) and true or false
-    
+    local R15 = (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R15)
+
     -- Create limbs based on R15 or R6
     if R15 then 
         limbs = {
@@ -61,7 +61,6 @@ local function DrawESP(plr)
         }
     end
 
-    -- Store the limbs in espTables
     espTables[plr.Name] = limbs
     
     local function Visibility(state)
@@ -160,11 +159,4 @@ game.Players.PlayerAdded:Connect(function(newplr)
     end
 end)
 
--- Create a toggle button
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 100, 0, 50)
-toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.Text = "Toggle ESP"
-toggleButton.Parent = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui")
-
-toggleButton.MouseButton1Click:Connect(ToggleESP)
+-- Removed the toggle button code
