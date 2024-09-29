@@ -78,7 +78,7 @@ toggleButton.TextSize = 20 -- Smaller text size
 toggleButton.Font = Enum.Font.Arcade -- Arcade font
 toggleButton.BorderSizePixel = 2 -- Black border
 toggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-toggleButton.Parent = local libary
+toggleButton.Parent = CoreGui
 
 
 
@@ -301,4 +301,3 @@ local function toggleFrameVisibility()
 end
 
 toggleButton.MouseButton1Click:Connect(toggleFrameVisibility)
-]]
