@@ -66,6 +66,19 @@ local Slider1 = Tab1:NewSlider("Slider 1", "", true, "/", {min = 1, max = 100, d
     print(value)
 end)
 
+-- Create a Toggle Button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
+toggleButton.Size = UDim2.new(0, 100, 0, 40) -- Smaller button size
+toggleButton.Position = UDim2.new(0.9, -100, 0.005, 0) -- Pushed further right by 2x
+toggleButton.Text = "Open" -- Default text
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+toggleButton.TextSize = 20 -- Smaller text size
+toggleButton.Font = Enum.Font.Arcade -- Arcade font
+toggleButton.BorderSizePixel = 2 -- Black border
+toggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.Parent = screenGui
 
 
 
@@ -78,8 +91,7 @@ end)
 
 
 
-
-local FinishedLoading = Notif:Notify("Loaded xsx example", 4, "success")
+local FinishedLoading = Notif:Notify("Loaded VeemWare", 4, "success")
 
 -- // FUNCTION DOCS: 
 --[[
@@ -282,4 +294,11 @@ local FinishedLoading = Notif:Notify("Loaded xsx example", 4, "success")
     
     -- / library:PromptDiscord("invite")
     -- invites you to a discord
+-- Toggle button functionality
+local function toggleFrameVisibility()
+    toggleFrame.Visible = not toggleFrame.Visible
+    toggleButton.Text = toggleFrame.Visible and "Close" or "Open"
+end
+
+toggleButton.MouseButton1Click:Connect(toggleFrameVisibility)
 ]]
