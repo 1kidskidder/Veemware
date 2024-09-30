@@ -1,0 +1,32 @@
+-- Place this script in ServerScriptService
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Function to highlight players
+local function highlightPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        local character = player.Character
+        if character then
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Adornee = part
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red color
+                    highlight.FillTransparency = 0.5 -- Adjust transparency as needed
+                    highlight.Parent = part
+                end
+            end
+        end
+    end
+end
+
+-- Connect to player added
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        highlightPlayers() -- Highlight players when their character is added
+    end)
+end)
+
+-- Highlight players already in the game
+highlightPlayers()
