@@ -2,7 +2,7 @@ local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
 local Camera = game:GetService("Workspace").CurrentCamera
 
-local espVisible = true
+local espVisible = false
 local espTables = {} -- Table to hold ESPs for players
 
 local function DrawLine()
