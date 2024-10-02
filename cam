@@ -3,10 +3,15 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local isCamLocked = false
-local jumpOffset = 0.15 -- Jump offset
+local jumpOffset = 0.15^7 -- Jump offset
 local verticalOffset = 0.3^6 -- Vertical offset
-local smoothness = 0.3 -- Smoothness value for camlock
-local visibility = false -- Set visibility to true
+local smoothness = 0.2 -- Smoothness value for camlock
+
+local function getRandomPart(character)
+    local parts = {"Head", "HumanoidRootPart", "Torso", "UpperTorso", "LowerTorso"}
+    local partName = parts[math.random(1, #parts)]
+    return character:FindFirstChild(partName)
+end
 
 local function getClosestEnemy()
     local closestDistance = math.huge
@@ -17,13 +22,16 @@ local function getClosestEnemy()
     )
 
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local enemyPosition, isVisible = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-            if isVisible then
-                local distance = (centerScreen - Vector2.new(enemyPosition.X, enemyPosition.Y)).Magnitude
-                if distance < closestDistance then
-                    closestDistance = distance
-                    closestEnemy = player.Character
+        if player ~= LocalPlayer and player.Character then
+            local targetPart = getRandomPart(player.Character)
+            if targetPart then
+                local enemyPosition, isVisible = workspace.CurrentCamera:WorldToViewportPoint(targetPart.Position)
+                if isVisible then
+                    local distance = (centerScreen - Vector2.new(enemyPosition.X, enemyPosition.Y)).Magnitude
+                    if distance < closestDistance then
+                        closestDistance = distance
+                        closestEnemy = player.Character
+                    end
                 end
             end
         end
@@ -33,8 +41,12 @@ local function getClosestEnemy()
 end
 
 local function resolveEnemy(enemy)
-    local offset = enemy.HumanoidRootPart.Velocity * 0.15634 + Vector3.new(0, jumpOffset + verticalOffset, 0)
-    return enemy.HumanoidRootPart.Position + offset
+    local targetPart = getRandomPart(enemy)
+    if targetPart then
+        local offset = targetPart.Velocity * 0.15634 + Vector3.new(0, jumpOffset + verticalOffset, 0)
+        return targetPart.Position + offset
+    end
+    return enemy.HumanoidRootPart.Position
 end
 
 local targetEnemy = nil
@@ -53,7 +65,7 @@ RunService.Heartbeat:Connect(function()
         -- Name ESP
         if not nameESP then
             nameESP = Instance.new("BillboardGui")
-            nameESP.Adornee = targetEnemy.Head
+            nameESP.Adornee = targetEnemy:FindFirstChild("Head") -- Using Head for ESP
             nameESP.Size = UDim2.new(1, 0, 1, 0)
             nameESP.AlwaysOnTop = true
 
@@ -66,7 +78,7 @@ RunService.Heartbeat:Connect(function()
             nameLabel.Parent = nameESP
             nameESP.Parent = workspace
         else
-            nameESP.Adornee = targetEnemy.Head
+            nameESP.Adornee = targetEnemy:FindFirstChild("Head") -- Using Head for ESP
             nameESP.Enabled = true
         end
     elseif nameESP then
@@ -80,33 +92,28 @@ gui.Parent = game.CoreGui
 
 local TextButton = Instance.new("TextButton")
 TextButton.Text = "Toggle Nitro"
-TextButton.TextSize = 24
+TextButton.TextSize = 16 -- Reduced text size
 TextButton.TextColor3 = Color3.new(1, 1, 1)
 TextButton.BackgroundColor3 = Color3.new(0, 0, 0)
 TextButton.BorderColor3 = Color3.new(1, 1, 1)
 TextButton.BorderSizePixel = 4
-TextButton.Font = Enum.Font.Code
-TextButton.Size = UDim2.new(0.2, 0, 0.2, 0)
+TextButton.Font = Enum.Font.Arcade
+TextButton.Size = UDim2.new(0.1, 0, 0.1, 0) -- Smaller button size
 TextButton.Position = UDim2.new(0, 0, 0.5, 0)
-TextButton.Active = visibility -- Make clickable based on visibility
-TextButton.Visible = visibility -- Set initial visibility
-
 local state = true
 
 TextButton.MouseButton1Click:Connect(function()
-    if visibility then
-        state = not state
-        if not state then
-            TextButton.Text = "Nitro ON"
-            isCamLocked = true
-            targetEnemy = getClosestEnemy()
-        else
-            TextButton.Text = "Nitro OFF"
-            isCamLocked = false
-            targetEnemy = nil
-            if nameESP then
-                nameESP.Enabled = false
-            end
+    state = not state
+    if not state then
+        TextButton.Text = "Nitro ON"
+        isCamLocked = true
+        targetEnemy = getClosestEnemy()
+    else
+        TextButton.Text = "Nitro OFF"
+        isCamLocked = false
+        targetEnemy = nil
+        if nameESP then
+            nameESP.Enabled = false
         end
     end
 end)
@@ -122,14 +129,3 @@ local uiStroke = Instance.new("UIStroke")
 uiStroke.Color = Color3.new(0, 0, 0)
 uiStroke.Thickness = 200
 uiStroke.Parent = TextButton
-
--- Function to toggle visibility
-local function setVisibility(isVisible)
-    visibility = isVisible
-    TextButton.Visible = visibility
-    TextButton.Active = visibility -- Make clickable based on visibility
-end
-
--- Example usage to hide/show the button
-setVisibility(false) -- Call this to hide and make it unclickable
--- setVisibility(true) -- Call this to show and make it clickable
