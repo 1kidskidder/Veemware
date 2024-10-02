@@ -1,0 +1,118 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local isCamLocked = false
+local jumpOffset = 0.15 -- Jump offset
+local verticalOffset = 0.3^6 -- Vertical offset
+local smoothness = 0.3 -- Smoothness value for camlock
+
+local function getClosestEnemy()
+    local closestDistance = math.huge
+    local closestEnemy = nil
+    local centerScreen = Vector2.new(
+        game:GetService("GuiService"):GetScreenResolution().X / 2,
+        game:GetService("GuiService"):GetScreenResolution().Y / 2
+    )
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local enemyPosition, isVisible = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            if isVisible then
+                local distance = (centerScreen - Vector2.new(enemyPosition.X, enemyPosition.Y)).Magnitude
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = player.Character
+                end
+            end
+        end
+    end
+
+    return closestEnemy
+end
+
+local function resolveEnemy(enemy)
+    local offset = enemy.HumanoidRootPart.Velocity * 0.15634 + Vector3.new(0, jumpOffset + verticalOffset, 0)
+    return enemy.HumanoidRootPart.Position + offset
+end
+
+local targetEnemy = nil
+local nameESP = nil
+
+RunService.Heartbeat:Connect(function()
+    if isCamLocked and targetEnemy then
+        local camera = workspace.CurrentCamera
+        local resolvedPosition = resolveEnemy(targetEnemy) -- Resolve enemy position
+        
+        -- Smoothly transition to the resolved position
+        local currentPosition = camera.CFrame.Position
+        local newPosition = currentPosition:Lerp(resolvedPosition, smoothness)
+        camera.CFrame = CFrame.new(newPosition, resolvedPosition) -- Aim at the resolved position
+
+        -- Name ESP
+        if not nameESP then
+            nameESP = Instance.new("BillboardGui")
+            nameESP.Adornee = targetEnemy.Head
+            nameESP.Size = UDim2.new(1, 0, 1, 0)
+            nameESP.AlwaysOnTop = true
+
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(1, 0, 1, 0)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.TextColor3 = Color3.new(1, 0, 0)
+            nameLabel.TextStrokeTransparency = 0
+            nameLabel.Text = targetEnemy.Name
+            nameLabel.Parent = nameESP
+            nameESP.Parent = workspace
+        else
+            nameESP.Adornee = targetEnemy.Head
+            nameESP.Enabled = true
+        end
+    elseif nameESP then
+        nameESP.Enabled = false
+    end
+end)
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "patrickGui"
+gui.Parent = game.CoreGui
+
+local TextButton = Instance.new("TextButton")
+TextButton.Text = "Toggle Nitro"
+TextButton.TextSize = 24
+TextButton.TextColor3 = Color3.new(1, 1, 1)
+TextButton.BackgroundColor3 = Color3.new(0, 0, 0)
+TextButton.BorderColor3 = Color3.new(1, 1, 1)
+TextButton.BorderSizePixel = 4
+TextButton.Font = Enum.Font.Code
+TextButton.Size = UDim2.new(0.2, 0, 0.2, 0)
+TextButton.Position = UDim2.new(0, 0, 0.5, 0)
+local state = true
+
+TextButton.MouseButton1Click:Connect(function()
+    state = not state
+    if not state then
+        TextButton.Text = "Nitro ON"
+        isCamLocked = true
+        targetEnemy = getClosestEnemy()
+    else
+        TextButton.Text = "Nitro OFF"
+        isCamLocked = false
+        targetEnemy = nil
+        if nameESP then
+            nameESP.Enabled = false
+        end
+    end
+end)
+
+TextButton.Parent = gui
+TextButton.Draggable = true
+
+local cornerUI = Instance.new("UICorner")
+cornerUI.CornerRadius = UDim.new(0, 5)
+cornerUI.Parent = TextButton
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.new(0, 0, 0)
+uiStroke.Thickness = 200
+uiStroke.Parent = TextButton
