@@ -6,6 +6,7 @@ local isCamLocked = false
 local jumpOffset = 0.15 -- Jump offset
 local verticalOffset = 0.3^6 -- Vertical offset
 local smoothness = 0.3 -- Smoothness value for camlock
+local visibility = false -- Set visibility to true
 
 local function getClosestEnemy()
     local closestDistance = math.huge
@@ -87,20 +88,25 @@ TextButton.BorderSizePixel = 4
 TextButton.Font = Enum.Font.Code
 TextButton.Size = UDim2.new(0.2, 0, 0.2, 0)
 TextButton.Position = UDim2.new(0, 0, 0.5, 0)
+TextButton.Active = visibility -- Make clickable based on visibility
+TextButton.Visible = visibility -- Set initial visibility
+
 local state = true
 
 TextButton.MouseButton1Click:Connect(function()
-    state = not state
-    if not state then
-        TextButton.Text = "Nitro ON"
-        isCamLocked = true
-        targetEnemy = getClosestEnemy()
-    else
-        TextButton.Text = "Nitro OFF"
-        isCamLocked = false
-        targetEnemy = nil
-        if nameESP then
-            nameESP.Enabled = false
+    if visibility then
+        state = not state
+        if not state then
+            TextButton.Text = "Nitro ON"
+            isCamLocked = true
+            targetEnemy = getClosestEnemy()
+        else
+            TextButton.Text = "Nitro OFF"
+            isCamLocked = false
+            targetEnemy = nil
+            if nameESP then
+                nameESP.Enabled = false
+            end
         end
     end
 end)
@@ -116,3 +122,14 @@ local uiStroke = Instance.new("UIStroke")
 uiStroke.Color = Color3.new(0, 0, 0)
 uiStroke.Thickness = 200
 uiStroke.Parent = TextButton
+
+-- Function to toggle visibility
+local function setVisibility(isVisible)
+    visibility = isVisible
+    TextButton.Visible = visibility
+    TextButton.Active = visibility -- Make clickable based on visibility
+end
+
+-- Example usage to hide/show the button
+setVisibility(false) -- Call this to hide and make it unclickable
+-- setVisibility(true) -- Call this to show and make it clickable
